@@ -12,6 +12,21 @@ import paramiko.sftp_client
 # This code does not use a scheduler and is a manual backup script
 # This script uses RSA keys to access the device as its more secure
 
+# Thanks for this co-pilot i didn't know you couldnt just send a folder, but i realized now i could have just zipped the folder so ill fix that later
+def sftp_upload_dir(sftp, local_dir, remote_dir):
+    for root, dirs, files in os.walk(local_dir):
+        rel_path = os.path.relpath(root, local_dir)
+        remote_path = os.path.join(remote_dir, rel_path).replace("\\", "/")
+        try:
+            sftp.mkdir(remote_path)
+        except IOError:
+            pass  # Already exists
+        for file in files:
+            local_file = os.path.join(root, file)
+            remote_file = os.path.join(remote_path, file).replace("\\", "/")
+            sftp.put(local_file, remote_file)
+            print(f"Uploaded: {local_file} → {remote_file}")
+
 dstIP = "192.168.1.0"
 remoteUser = "user"
 pathToFile = 'Path/To/The/File/You/Want/To/Copy'
